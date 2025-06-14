@@ -1,0 +1,5 @@
+```gitignore
+__pycache__/
+*.pyc
+logs/study_log.json
+.env
