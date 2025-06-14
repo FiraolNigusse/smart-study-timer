@@ -2,6 +2,8 @@ import time
 import json
 from datetime import datetime
 from utils import clear_screen, play_sound, show_banner
+from stats import display_stats
+
 
 LOG_FILE = "logs/study_log.json"
 WORK_DURATION = 25 * 60   # 25 min
@@ -66,7 +68,9 @@ def main():
         show_banner()
         print("1. Start Study Session")
         print("2. Toggle Test Mode (currently: {})".format("ON" if TEST_MODE else "OFF"))
-        print("3. Exit")
+        print("3. View Stats")
+        print("4. Exit")
+
         choice = input("Choose an option: ")
 
         if choice == "1":
@@ -78,6 +82,11 @@ def main():
         elif choice == "2":
             TEST_MODE = not TEST_MODE
         elif choice == "3":
+            clear_screen()
+            show_banner()
+            display_stats()
+            input("\n🔁 Press Enter to return to menu...")
+        elif choice == "4":
             print("👋 Goodbye! Stay productive!")
             break
         else:
