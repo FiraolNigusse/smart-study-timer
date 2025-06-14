@@ -1,25 +1,29 @@
 import time
 import json
 from datetime import datetime
+from utils import clear_screen, play_sound, show_banner
 
 LOG_FILE = "logs/study_log.json"
-WORK_DURATION = 25 * 60  # 25 minutes
-BREAK_DURATION = 5 * 60  # 5 minutes
+WORK_DURATION = 25 * 60   # 25 min
+BREAK_DURATION = 5 * 60   # 5 min
+TEST_MODE = False         # Default to OFF
 
-def countdown(seconds):
+
+def countdown(seconds, label="⏳"):
     while seconds:
         mins, secs = divmod(seconds, 60)
         timer = f"{mins:02d}:{secs:02d}"
-        print(f"\r⏳ {timer}", end="")
+        print(f"\r{label} {timer}", end="")
         time.sleep(1)
         seconds -= 1
-    print("\r⏰ 00:00 - Time's up!")
+    print(f"\r⏰ 00:00 - {label.strip()} Complete!")
 
-countdown(10)  # just 10 seconds to test
-def log_session(start_time, duration_minutes):
+
+def log_session(start_time, duration_minutes, session_type="study"):
     session = {
         "start": start_time.strftime("%Y-%m-%d %H:%M:%S"),
-        "duration_min": duration_minutes
+        "duration_min": duration_minutes,
+        "type": session_type
     }
 
     try:
@@ -33,28 +37,53 @@ def log_session(start_time, duration_minutes):
     with open(LOG_FILE, "w") as f:
         json.dump(data, f, indent=2)
 
-    print("📚 Session logged successfully.")
+    print("📚 Session logged.")
 
-def start_study_session():
-    print("🎯 Study session starting now!")
+
+def start_study_session(duration):
+    clear_screen()
+    show_banner()
+    print("🎯 Starting Study Session...")
     start_time = datetime.now()
-    countdown(WORK_DURATION)
-    log_session(start_time, WORK_DURATION // 60)
+    countdown(duration, "📖 Studying")
+    play_sound()
+    log_session(start_time, duration // 60, "study")
+    print("✅ Study complete!")
+
+
+def start_break(duration):
+    print("\n🧘 Break Time!")
+    countdown(duration, "☕ Break")
+    play_sound()
+    log_session(datetime.now(), duration // 60, "break")
+    print("🔁 Break over. Ready for another session?")
+
 
 def main():
+    global TEST_MODE
     while True:
-        print("\n--- Smart Study Timer ---")
-        print("1. Start 25-min Study Session")
-        print("2. Exit")
+        clear_screen()
+        show_banner()
+        print("1. Start Study Session")
+        print("2. Toggle Test Mode (currently: {})".format("ON" if TEST_MODE else "OFF"))
+        print("3. Exit")
         choice = input("Choose an option: ")
 
         if choice == "1":
-            start_study_session()
+            duration = 10 if TEST_MODE else WORK_DURATION
+            break_duration = 5 if TEST_MODE else BREAK_DURATION
+            start_study_session(duration)
+            start_break(break_duration)
+            input("\n🔁 Press Enter to return to menu...")
         elif choice == "2":
-            print("👋 Goodbye!")
+            TEST_MODE = not TEST_MODE
+        elif choice == "3":
+            print("👋 Goodbye! Stay productive!")
             break
         else:
-            print("❌ Invalid option, try again.")
+            print("❌ Invalid choice.")
+            time.sleep(1)
 
 if __name__ == "__main__":
     main()
+
