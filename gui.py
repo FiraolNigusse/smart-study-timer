@@ -8,8 +8,7 @@ import threading
 from datetime import datetime
 import json
 from playsound import playsound
-from stats import show_daily_chart  # Assuming you already have this
-# Removed show_weekly_chart import since we implement it here now
+from stats import show_daily_chart, show_weekly_chart
 
 # Global settings
 TEST_MODE = False
@@ -81,13 +80,12 @@ def toggle_test_mode(mode_label):
     TEST_MODE = not TEST_MODE
     mode_label.config(text=f"Test Mode: {'ON' if TEST_MODE else 'OFF'}")
 
-def show_weekly_chart_window():
-    # Create a new top-level window
-    chart_win = tk.Toplevel()
-    chart_win.title("Weekly Study Time Chart")
-    chart_win.geometry("500x350")
-    chart_win.configure(bg="#f4f4f4")
+def show_embedded_chart(parent_frame):
+    # Clear previous widgets if any
+    for widget in parent_frame.winfo_children():
+        widget.destroy()
 
+    # Load data
     try:
         with open(LOG_FILE, "r") as f:
             sessions = json.load(f)
@@ -114,9 +112,9 @@ def show_weekly_chart_window():
     ax.set_title("Study Time Over Last 7 Days")
     ax.set_ylabel("Minutes")
 
-    canvas = FigureCanvasTkAgg(fig, master=chart_win)
+    canvas = FigureCanvasTkAgg(fig, master=parent_frame)
     canvas.draw()
-    canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+    canvas.get_tk_widget().pack()
 
 def launch_gui():
     root = tk.Tk()
@@ -175,15 +173,17 @@ def launch_gui():
     btn_toggle.configure(bg="#2196F3", activebackground="#1e88e5")
     btn_toggle.pack()
 
-    # Remove embedded chart frame and button
-    # Instead, button to open weekly chart in new window
-    btn_chart = tk.Button(frame, text="Show Weekly Chart", command=show_weekly_chart_window)
+    # Chart Viewer Frame
+    chart_frame = tk.Frame(root, bg="#f4f4f4")
+    chart_frame.pack(pady=10)
+
+    btn_chart = tk.Button(frame, text="Show Weekly Chart", command=lambda: show_embedded_chart(chart_frame))
     style_button(btn_chart)
     btn_chart.configure(bg="#673AB7", activebackground="#5e35b1")
     btn_chart.pack(pady=(20, 0))
 
     # 📊 View Today's Stats button
-    btn_stats = tk.Button(frame, text="📊 View Today’s Stats", command=show_daily_chart)
+    btn_stats = tk.Button(frame, text="📊 View Today's Stats", command=show_daily_chart)
     style_button(btn_stats)
     btn_stats.configure(bg="#9C27B0", activebackground="#7B1FA2")
     btn_stats.pack(pady=(10, 0))
@@ -191,4 +191,4 @@ def launch_gui():
     root.mainloop()
 
 if __name__ == "__main__":
-    launch_gui()
+    launch_gui() 
