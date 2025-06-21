@@ -8,8 +8,9 @@ import threading
 from datetime import datetime
 import json
 from playsound import playsound
-from stats import show_daily_chart  # Assuming you already have this
-# Removed show_weekly_chart import since we implement it here now
+from stats import show_daily_chart
+from export import export_to_csv
+
 
 # Global settings
 TEST_MODE = False
@@ -187,6 +188,11 @@ def launch_gui():
     style_button(btn_stats)
     btn_stats.configure(bg="#9C27B0", activebackground="#7B1FA2")
     btn_stats.pack(pady=(10, 0))
+    # 📤 Export to CSV (Pro) 
+    btn_export = tk.Button(frame, text="📤 Export to CSV", command=export_to_csv)
+    style_button(btn_export)
+    btn_export.configure(bg="#FF9800", activebackground="#FB8C00")
+    btn_export.pack(pady=(10, 0))
 
     root.mainloop()
 
