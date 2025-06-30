@@ -1,9 +1,12 @@
 import json
+import os
 from datetime import datetime, timedelta
 from collections import defaultdict
+import matplotlib.pyplot as plt
 
 LOG_FILE = "logs/study_log.json"
 
+# Load all session logs
 def load_sessions():
     try:
         with open(LOG_FILE, "r") as f:
@@ -11,6 +14,7 @@ def load_sessions():
     except (FileNotFoundError, json.JSONDecodeError):
         return []
 
+# Summarize today's and weekly study/break durations
 def summarize_sessions():
     sessions = load_sessions()
     today = datetime.now().date()
@@ -31,6 +35,7 @@ def summarize_sessions():
 
     return daily_total, weekly_total
 
+# Print terminal summary
 def display_stats():
     daily, weekly = summarize_sessions()
 
@@ -43,8 +48,7 @@ def display_stats():
     print(f"  ☕ Break: {weekly.get('break', 0)} min")
     print("\nKeep going! 🎯")
 
-import matplotlib.pyplot as plt
-
+# GUI Daily Summary Chart
 def show_daily_chart():
     sessions = load_sessions()
     today = datetime.now().date()
@@ -59,7 +63,7 @@ def show_daily_chart():
             elif session.get("type") == "break":
                 total_break += session.get("duration_min", 0)
 
-    # Plotting the bar chart
+    # Plotting
     labels = ['Study', 'Break']
     values = [total_study, total_break]
     colors = ['#4CAF50', '#2196F3']
@@ -68,10 +72,11 @@ def show_daily_chart():
     plt.bar(labels, values, color=colors)
     plt.title("Today's Time Summary")
     plt.ylabel("Minutes")
-    plt.ylim(0, max(60, max(values) + 10))  # Adjust chart height dynamically
+    plt.ylim(0, max(60, max(values) + 10))
     plt.tight_layout()
     plt.show()
 
+# 📈 CLI Weekly Chart (not used in GUI)
 def show_weekly_chart():
     if not os.path.exists(LOG_FILE):
         print("No log file found.")
@@ -105,3 +110,19 @@ def show_weekly_chart():
     plt.ylabel("Total Minutes")
     plt.tight_layout()
     plt.show()
+
+# 🔥 P4: Emoji Summary
+def get_emoji_summary():
+    try:
+        with open(LOG_FILE, "r") as f:
+            sessions = json.load(f)
+    except:
+        return "⚠️ No data found."
+
+    if not sessions:
+        return "🟡 No sessions yet."
+
+    total = sum(float(s["duration_min"]) for s in sessions)
+    longest = max(float(s["duration_min"]) for s in sessions)
+
+    return f"📊 Total: {int(total)} min ⏳ | 🔥 Longest: {int(longest)} min"
